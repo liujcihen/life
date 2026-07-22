@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蘑菇屋 - 我的日常花园</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --cream-bg: #fefcf5;
+            --cream-card: #fffef8;
+            --blue-soft: #eef5fa;
+            --blue-main: #a8c7e0;
+            --blue-deep: #7b9eb5;
+            --text-main: #5a657a;
+            --text-sub: #8caabb;
+            --shadow: 0 15px 40px rgba(168, 199, 224, 0.2);
+            --radius-lg: 28px;
+            --radius-md: 20px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(160deg, var(--cream-bg) 0%, #f5f9fc 50%, #eef5fa 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--blue-deep);
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 1rem;
+            color: var(--text-sub);
+            font-weight: 300;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: var(--radius-lg);
+            padding: 35px 30px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            animation: fadeInUp 0.8s ease forwards;
+            opacity: 0;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.2s; }
+        .card:nth-child(2) { animation-delay: 0.4s; }
+        .card:nth-child(3) { animation-delay: 0.6s; }
+
+        .card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(168, 199, 224, 0.3);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--blue-main), #bcd9ee);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--blue-soft), #e0f2ff);
+            color: var(--blue-deep);
+        }
+
+        .card:hover .card-icon {
+            transform: scale(1.1) rotate(-5deg);
+            background: linear-gradient(135deg, var(--blue-main), #97b8d4);
+            color: white;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--blue-deep);
+            margin-bottom: 12px;
+        }
+
+        .card-desc {
+            font-size: 0.92rem;
+            color: var(--text-sub);
+            line-height: 1.6;
+            margin-bottom: 25px;
+            min-height: 45px;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(220, 234, 245, 0.6);
+        }
+
+        .card-status {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-status i {
+            color: var(--blue-main);
+        }
+
+        .card-arrow {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--blue-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--blue-deep);
+            transition: all 0.3s;
+        }
+
+        .card:hover .card-arrow {
+            background: var(--blue-main);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.8rem; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .card { padding: 30px 25px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-icon">🍄</div>
+            <h1>蘑菇屋</h1>
+            <p>欢迎回来，今天也是充满希望的一天</p>
+        </header>
+
+        <main class="cards-grid">
+            <!-- Card 1: Scroll -->
+            <div class="card" onclick="location.href='scroll.html'">
+                <div class="card-icon">📜</div>
+                <h2 class="card-title">传送卷轴</h2>
+                <p class="card-desc">收藏那些闪闪发光的网页，记录它们的用途与故事。</p>
+                <div class="card-footer">
+                    <span class="card-status"><i class="fas fa-link"></i> 网页收藏</span>
+                    <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+                </div>
+            </div>
+
+            <!-- Card 2: Todo -->
+            <div class="card" onclick="location.href='todo.html'">
+                <div class="card-icon">☁️</div>
+                <h2 class="card-title">云端待办</h2>
+                <p class="card-desc">轻盈地记录今日事，让每一天的行程都井井有条。</p>
+                <div class="card-footer">
+                    <span class="card-status"><i class="fas fa-check-circle"></i> 任务管理</span>
+                    <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+                </div>
+            </div>
+
+            <!-- Card 3: Habit -->
+            <div class="card" onclick="location.href='habit.html'">
+                <div class="card-icon">🌸</div>
+                <h2 class="card-title">晨露打卡</h2>
+                <p class="card-desc">养成美好的习惯，像花朵一样每天绽放一点点。</p>
+                <div class="card-footer">
+                    <span class="card-status"><i class="fas fa-seedling"></i> 习惯追踪</span>
+                    <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>✨ Powered by GitHub Gist & Pure Magic ✨</p>
+        </footer>
+    </div>
+
+    <script>
+        // 可以在这里添加一些全局的交互逻辑
+        // 例如：检测本地是否有Token，如果没有，在卡片上加一个小红点提示
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('scroll_token_v2') || 
+                          localStorage.getItem('cloudy_tasks_token') || 
+                          localStorage.getItem('morning_dew_token');
+            
+            if (!token) {
+                // 如果没有Token，可以在页脚提示一下
+                const footer = document.querySelector('.footer p');
+                footer.innerHTML = '⚠️ 检测到未登录，首次进入子页面需要输入 GitHub Token ✨';
+                footer.style.color = '#e8a8a8';
+            }
+        });
+    </script>
+</body>
+</html>
