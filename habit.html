@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>晨露打卡 - 习惯追踪</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-hint: #f7f9fb;
+            --blue-bg: #eff5fa;
+            --blue-light: #dae9f4;
+            --blue-main: #a8c7e0;
+            --blue-deep: #7b9eb5;
+            --blue-dark: #5a7d94;
+            --text-main: #4a657a;
+            --text-sub: #8caabb;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --shadow: 0 10px 30px rgba(168, 199, 224, 0.25);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(145deg, var(--blue-hint), var(--blue-bg));
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 780px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+            animation: fadeIn 0.8s ease;
+        }
+
+        /* Header */
+        .header {
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(218, 233, 244, 0.6);
+        }
+
+        .header h1 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--blue-dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1::before { content: "🌸"; }
+
+        .export-btn {
+            background: linear-gradient(135deg, #bcd9ee, var(--blue-main));
+            color: white;
+            border: none;
+            padding: 12px 22px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 18px rgba(168, 199, 224, 0.35);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .export-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(168, 199, 224, 0.45); }
+
+        /* Week Navigator */
+        .week-nav {
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(238, 244, 250, 0.6);
+        }
+
+        .nav-btn {
+            background: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--blue-deep);
+            box-shadow: 0 4px 12px rgba(168, 199, 224, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:hover { transform: scale(1.1); background: var(--blue-light); }
+
+        .week-range {
+            text-align: center;
+            font-size: 1rem;
+            color: var(--blue-dark);
+            font-weight: 500;
+        }
+
+        .week-range span { color: var(--text-sub); font-size: 0.85rem; margin-left: 8px; }
+
+        /* Calendar Grid */
+        .calendar-grid {
+            padding: 20px 30px 30px;
+        }
+
+        .grid-header {
+            display: grid;
+            grid-template-columns: 110px repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .grid-header .corner {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            font-weight: 500;
+            text-align: left;
+            padding-left: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .grid-header .day-col {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            font-weight: 500;
+            padding: 8px 0;
+        }
+
+        .grid-header .day-col.today {
+            color: var(--blue-dark);
+            font-weight: 700;
+            position: relative;
+        }
+
+        .grid-header .day-col.today::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: var(--blue-main);
+            border-radius: 50%;
+        }
+
+        .grid-body {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .habit-row {
+            display: grid;
+            grid-template-columns: 110px repeat(7, 1fr);
+            gap: 8px;
+            align-items: center;
+            animation: slideUp 0.4s ease;
+        }
+
+        .habit-name {
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: var(--blue-dark);
+            padding-left: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 圆形打卡按钮 */
+        .check-circle {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 15px rgba(168, 199, 224, 0.2);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid var(--blue-light);
+        }
+
+        .check-circle:hover { 
+            transform: scale(1.15); 
+            box-shadow: 0 8px 25px rgba(168, 199, 224, 0.3);
+            border-color: var(--blue-main);
+        }
+
+        .check-circle.checked {
+            background: linear-gradient(135deg, #bcd9ee, var(--blue-main));
+            border-color: transparent;
+            box-shadow: 0 6px 20px rgba(168, 199, 224, 0.4);
+        }
+
+        .check-circle.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            animation: popIn 0.3s ease;
+        }
+
+        /* 涟漪效果 */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(168, 199, 224, 0.4);
+            transform: scale(0);
+            animation: rippleEffect 0.6s linear;
+            pointer-events: none;
+        }
+
+        .check-circle.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: var(--blue-bg);
+            border-color: transparent;
+        }
+
+        .check-circle.disabled:hover { 
+            transform: none; 
+            box-shadow: 0 4px 15px rgba(168, 199, 224, 0.2);
+            border-color: transparent;
+        }
+
+        /* Stats */
+        .stats-bar {
+            padding: 20px 30px;
+            background: rgba(238, 244, 250, 0.6);
+            border-top: 1px solid rgba(218, 233, 244, 0.6);
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .stat-item .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--blue-dark);
+        }
+
+        .stat-item .label {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-top: 4px;
+        }
+
+        /* Modal & Toast */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(180, 205, 225, 0.5);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active { display: flex; opacity: 1; }
+
+        .modal {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--radius-lg);
+            padding: 35px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: var(--shadow);
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal { transform: translateY(0); }
+
+        .modal-header { margin-bottom: 20px; }
+        .modal-title { font-size: 1.4rem; font-weight: 600; color: var(--blue-dark); }
+        .modal-info {
+            background: var(--blue-bg);
+            padding: 15px;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            color: var(--blue-deep);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .modal-info a { color: var(--blue-dark); font-weight: 500; }
+
+        .token-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid transparent;
+            border-radius: var(--radius-md);
+            background: white;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .token-input:focus {
+            outline: none;
+            border-color: var(--blue-main);
+            box-shadow: 0 0 0 4px rgba(168, 199, 224, 0.2);
+        }
+
+        .modal-actions { display: flex; justify-content: flex-end; margin-top: 20px; }
+        .confirm-btn {
+            background: linear-gradient(135deg, #bcd9ee, var(--blue-main));
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .confirm-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(168, 199, 224, 0.4); }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg, var(--blue-main), var(--blue-deep));
+            color: white;
+            padding: 14px 30px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 30px rgba(123, 158, 181, 0.3);
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes rippleEffect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .header { padding: 20px; flex-direction: column; gap: 15px; }
+            .week-nav { padding: 15px; }
+            .calendar-grid { padding: 15px; }
+            .grid-header, .habit-row { grid-template-columns: 80px repeat(7, 1fr); gap: 4px; }
+            .habit-name { font-size: 0.78rem; }
+            .check-circle { width: 36px; height: 36px; }
+            .check-circle.checked::after { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>晨露打卡</h1>
+            <button class="export-btn" onclick="exportData()">
+                <span>📤</span>
+                <span>导出数据</span>
+            </button>
+        </header>
+
+        <div class="week-nav">
+            <button class="nav-btn" onclick="changeWeek(-1)">‹</button>
+            <div class="week-range" id="weekRange">--年--月--日 ~ --</div>
+            <button class="nav-btn" onclick="changeWeek(1)">›</button>
+        </div>
+
+        <div class="calendar-grid">
+            <div class="grid-header" id="gridHeader">
+                <!-- JS fills this -->
+            </div>
+            <div class="grid-body" id="gridBody">
+                <!-- JS fills this -->
+            </div>
+        </div>
+
+        <div class="stats-bar" id="statsBar">
+            <!-- JS fills this -->
+        </div>
+    </div>
+
+    <!-- Token Modal -->
+    <div class="modal-overlay" id="tokenModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">🔐 身份验证</h2>
+            </div>
+            <div class="modal-info">
+                需要 GitHub Token 来保存你的打卡数据。<br>
+                前往 <a href="https://github.com/settings/tokens" target="_blank">Token 设置</a>，勾选 <strong>gist</strong> 权限生成。
+            </div>
+            <input type="password" class="token-input" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxx" autocomplete="off">
+            <div class="modal-actions">
+                <button class="confirm-btn" onclick="saveToken()">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const GIST_ID = 'c9b52465d580c277cb7e55ac9e589ed4';
+        const STORAGE_KEY_TOKEN = 'morning_dew_token';
+        
+        const HABITS = [
+            { id: 'posture', name: '🧘‍♀️ 体态' },
+            { id: 'cardio', name: '🏃‍♀️ 有氧' },
+            { id: 'nosugar', name: '🍬 戒糖' },
+            { id: 'water', name: '💧 喝水' },
+            { id: 'diet', name: '🥗 减餐' }
+        ];
+
+        let checkins = {};
+        let currentWeekStart = getStartOfWeek(new Date());
+
+        const gridHeader = document.getElementById('gridHeader');
+        const gridBody = document.getElementById('gridBody');
+        const weekRange = document.getElementById('weekRange');
+        const statsBar = document.getElementById('statsBar');
+        const tokenModal = document.getElementById('tokenModal');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem(STORAGE_KEY_TOKEN);
+            if (!token) {
+                tokenModal.classList.add('active');
+            } else {
+                loadData();
+            }
+        });
+
+        function saveToken() {
+            const token = document.getElementById('tokenInput').value.trim();
+            if (!token) { showToast('请输入Token', 'error'); return; }
+            localStorage.setItem(STORAGE_KEY_TOKEN, token);
+            tokenModal.classList.remove('active');
+            loadData();
+        }
+
+        async function apiRequest(method, data = null) {
+            const token = localStorage.getItem(STORAGE_KEY_TOKEN);
+            const headers = { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' };
+            const options = { method, headers };
+            if (data) options.body = JSON.stringify(data);
+            
+            const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, options);
+            if (res.status === 401 || res.status === 403) {
+                localStorage.removeItem(STORAGE_KEY_TOKEN);
+                tokenModal.classList.add('active');
+                throw new Error('Token Invalid');
+            }
+            return res;
+        }
+
+        async function loadData() {
+            try {
+                const res = await apiRequest('GET');
+                const gist = await res.json();
+                const content = gist.files['habit_checkin.json']?.content || '{}';
+                checkins = JSON.parse(content);
+            } catch (e) {
+                checkins = {};
+            }
+            render();
+        }
+
+        async function saveData() {
+            try {
+                const data = {
+                    description: 'Habit Checkin Data',
+                    files: { 'habit_checkin.json': { content: JSON.stringify(checkins, null, 2) } },
+                    public: false
+                };
+                await apiRequest('PATCH', data);
+                showToast('打卡成功 ☁️', 'success');
+            } catch (e) {
+                showToast('保存失败', 'error');
+            }
+        }
+
+        function getStartOfWeek(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function getWeekDates(startDate) {
+            const dates = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(startDate);
+                d.setDate(d.getDate() + i);
+                dates.push(d);
+            }
+            return dates;
+        }
+
+        function render() {
+            renderHeader();
+            renderGrid();
+            renderStats();
+        }
+
+        function renderHeader() {
+            const weekDates = getWeekDates(currentWeekStart);
+            const start = weekDates[0];
+            const end = weekDates[6];
+            
+            weekRange.innerHTML = `${start.getFullYear()}年${start.getMonth()+1}月${start.getDate()}日 
+                <span>~</span> 
+                ${end.getMonth()+1}月${end.getDate()}日`;
+
+            const today = new Date();
+            const todayStr = formatDate(today);
+
+            gridHeader.innerHTML = `
+                <div class="corner">习惯</div>
+                ${weekDates.map(date => {
+                    const dateStr = formatDate(date);
+                    const isToday = dateStr === todayStr;
+                    const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
+                    return `<div class="day-col ${isToday ? 'today' : ''}">周${dayNames[date.getDay() === 0 ? 6 : date.getDay() - 1]}<br>${date.getDate()}</div>`;
+                }).join('')}
+            `;
+        }
+
+        function renderGrid() {
+            const weekDates = getWeekDates(currentWeekStart);
+            const today = new Date();
+            const todayStr = formatDate(today);
+
+            gridBody.innerHTML = HABITS.map(habit => {
+                return `
+                <div class="habit-row">
+                    <div class="habit-name">${habit.name}</div>
+                    ${weekDates.map(date => {
+                        const dateStr = formatDate(date);
+                        const dayData = checkins[dateStr] || {};
+                        const isChecked = dayData[habit.id] || false;
+                        const isFuture = dateStr > todayStr;
+                        
+                        return `<div class="check-circle ${isChecked ? 'checked' : ''} ${isFuture ? 'disabled' : ''}" 
+                                     onclick="handleClick(event, '${dateStr}', '${habit.id}', ${isFuture})">
+                                </div>`;
+                    }).join('')}
+                </div>
+                `;
+            }).join('');
+        }
+
+        function renderStats() {
+            const totalDays = Object.keys(checkins).length;
+            let totalChecks = 0;
+            let streak = 0;
+            
+            let checkDate = new Date();
+            while (true) {
+                const dateStr = formatDate(checkDate);
+                const dayData = checkins[dateStr];
+                const allDone = dayData && HABITS.every(h => dayData[h.id]);
+                if (allDone) {
+                    streak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+
+            HABITS.forEach(habit => {
+                Object.values(checkins).forEach(day => {
+                    if (day[habit.id]) totalChecks++;
+                });
+            });
+
+            statsBar.innerHTML = `
+                <div class="stat-item">
+                    <div class="value">${totalDays}</div>
+                    <div class="label">累计天数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="value">${totalChecks}</div>
+                    <div class="label">总打卡数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="value">${streak}</div>
+                    <div class="label">连续全勤</div>
+                </div>
+            `;
+        }
+
+        function handleClick(event, dateStr, habitId, isFuture) {
+            if (isFuture) return;
+
+            // 涟漪效果
+            const circle = event.currentTarget;
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            const rect = circle.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = event.clientX - rect.left - size / 2 + 'px';
+            ripple.style.top = event.clientY - rect.top - size / 2 + 'px';
+            circle.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+
+            // 数据更新
+            if (!checkins[dateStr]) checkins[dateStr] = {};
+            checkins[dateStr][habitId] = !checkins[dateStr][habitId];
+            saveData();
+            
+            // 局部更新UI，避免重绘整个表格导致动画中断
+            circle.classList.toggle('checked');
+            renderStats();
+        }
+
+        function changeWeek(offset) {
+            currentWeekStart.setDate(currentWeekStart.getDate() + (offset * 7));
+            render();
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(checkins, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `晨露打卡_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('导出成功 📤', 'success');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        tokenModal.addEventListener('click', e => {
+            if (e.target === tokenModal) tokenModal.classList.remove('active');
+        });
+    </script>
+</body>
+</html>
